@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'HomePage.dart';
+import 'home_page.dart';
 import 'package:telephony/telephony.dart';
 
 final Telephony telephony = Telephony.instance;
@@ -13,7 +13,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Request SMS permissions before starting the app
-  bool? permissionsGranted = await telephony.requestPhoneAndSmsPermissions;
+  bool? permissionsGranted = await telephony.requestSmsPermissions;
 
   runApp(MyApp());
 }
