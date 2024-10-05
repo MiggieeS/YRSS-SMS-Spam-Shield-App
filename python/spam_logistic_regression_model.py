@@ -25,10 +25,10 @@ df.drop_duplicates(subset=column_headers)
 # Make sample size have a 1:1 ratio (i.e., for every spam message there is a non spam message)
 spam_df = df.query(f'(`{column_headers[1]}` == 1)')
 non_spam_df = df.query(f'(`{column_headers[1]}` == 0)')
+sample_size = min(spam_df.shape[0], non_spam_df.shape[0])
 # Use random sample_size*2 rows (for testing purpose).
 # Comment out when not testing.
 # sample_size = 80
-sample_size = min(spam_df.shape[0], non_spam_df.shape[0])
 df = pd.concat([spam_df.sample(sample_size, random_state=0), non_spam_df.sample(sample_size, random_state=0)], ignore_index=True)
 
 # Preprocess "Text Message" column.
