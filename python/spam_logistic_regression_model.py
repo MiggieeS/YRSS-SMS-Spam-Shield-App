@@ -44,7 +44,7 @@ X = df[column_headers[0]].values
 
 print(len(Y), len(X))
 
-X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.3, random_state=None)
+X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.3, random_state=0)
 
 # Vectorize X_train and X_test.
 # Adding stop_words="english" may be redundant.
