@@ -89,7 +89,7 @@ while True:
 sys.setrecursionlimit(10**4)
 
 # Convert Logistic Regression Model to Dart code.
-code = m2c.export_to_dart(model)
+code = m2c.export_to_dart(model, function_name="predictTextMessage")
 
 # Save Dart code to file.
 with open("./spam_logistic_regression_model.dart", "w") as dart_file:
