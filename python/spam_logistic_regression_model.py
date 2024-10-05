@@ -35,7 +35,8 @@ df = pd.concat([spam_df.sample(sample_size, random_state=0), non_spam_df.sample(
 
 # Preprocess "Text Message" column.
 # Download puntk_tab, stopwords, and wordnet from NLTK.
-nltk.download("punkt_tab",)
+nltk.download("punkt")
+nltk.download("punkt_tab")
 nltk.download("stopwords")
 nltk.download("wordnet")
 lem = WordNetLemmatizer()
