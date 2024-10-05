@@ -33,7 +33,7 @@ class _HomePageState extends State<HomePage> {
           showSnackbar(message.body!);
         }
       },
-      onBackgroundMessage: backgrounMessageHandler,
+      onBackgroundMessage: backgroundMessageHandler,
       listenInBackground: true,
     );
   }
@@ -402,6 +402,6 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-void backgrounMessageHandler(SmsMessage message) {
+void backgroundMessageHandler(SmsMessage message) {
   print("Received SMS in background: ${message.body}"); // testing, will only print in cpnsole
 }
