@@ -1,7 +1,9 @@
 import pandas as pd
 import string
 import nltk
+from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
+from nltk.stem import WordNetLemmatizer
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
@@ -28,18 +30,24 @@ non_spam_df = df.query(f'(`{column_headers[1]}` == 0)')
 sample_size = min(spam_df.shape[0], non_spam_df.shape[0])
 # Use random sample_size*2 rows (for testing purpose).
 # Comment out when not testing.
-# sample_size = 80
+sample_size = 2
 df = pd.concat([spam_df.sample(sample_size, random_state=0), non_spam_df.sample(sample_size, random_state=0)], ignore_index=True)
 
 # Preprocess "Text Message" column.
-# Download stop words from NLTK.
+# Download puntk_tab, stopwords, and wordnet from NLTK.
+nltk.download("punkt_tab",)
 nltk.download("stopwords")
+nltk.download("wordnet")
+lem = WordNetLemmatizer()
 
 def preprocess_text_message(text_message):
-    # Remove punctuation in text_message.
-    text_message = text_message.translate(str.maketrans("", "", string.punctuation))
-    # Remove stop words (from NLTK) in text_message and turn words to lower case.
-    text_message = [word.lower() for word in text_message.split() if word.lower() not in stopwords.words("english")]
+    # Tokenize text_message.
+    text_message = word_tokenize(text_message)
+    # Remove punctuation and stop words (from NLTK) in text_message and turn words to lower case.
+    text_message = [word.lower() for word in text_message if word not in string.punctuation and word.lower() not in stopwords.words("english")]
+    # Lemmatize each word.
+    for part_of_speech in ["n", "v", "a", "r", "s"]:
+        text_message = [lem.lemmatize(word, part_of_speech) for word in text_message]
     return " ".join(text_message)
 
 df[column_headers[0]] = df[column_headers[0]].apply(preprocess_text_message)
@@ -53,7 +61,7 @@ X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2, random_
 
 # Vectorize X_train and X_test.
 # Adding stop_words="english" and lowercase=True may be redundant.
-vectorizer = TfidfVectorizer(stop_words="english", lowercase=True)
+vectorizer = TfidfVectorizer()
 X_train_vector = vectorizer.fit_transform(X_train)
 X_test_vector = vectorizer.transform(X_test)
 
