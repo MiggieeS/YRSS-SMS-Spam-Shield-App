@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:telephony/telephony.dart';
 import 'package:flutter/services.dart';
-import 'spam_logistic_regression_model.dart';
-
-
+import 'package:http/http.dart' as http; // Import the http package
+import 'dart:convert'; // Import for JSON encoding/decoding
 
 final Telephony telephony = Telephony.instance;
 
@@ -24,7 +23,7 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     startListeningForSms();
-    _lockOrientation(); //portrait mode (ayaw gumana idk why)
+    _lockOrientation(); // Portrait mode
   }
 
   void startListeningForSms() {
@@ -32,6 +31,7 @@ class _HomePageState extends State<HomePage> {
       onNewMessage: (SmsMessage message) {
         if (message.body != null) {
           showSnackbar(message.body!);
+          checkSpam(message.body!); // Check for spam on incoming messages
         }
       },
       onBackgroundMessage: backgroundMessageHandler,
@@ -60,24 +60,73 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  void checkSpam(String message) async {
+    final url = 'http://3.27.110.191:5000/predict';  // Replace with your EC2 public IP
 
-  //checking
-  List<double> extractFeatures(String message) {
-    List<double> features = List<double>.filled(158, 0.0);
-    features[0] = message.length.toDouble();
-    features[1] = message.contains("win") ? 1.0 : 0.0;
+    try {
+      // Send the POST request
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({'message': message}),
+      );
 
-    return features;
+      // Check the response status
+      if (response.statusCode == 200) {
+        // Parse the response body
+        final jsonResponse = json.decode(response.body);
+        final prediction = jsonResponse['prediction'];
+
+        setState(() {
+          predictionResult = prediction == 1 ? 'Spam' : 'Not Spam';
+        });
+      } else {
+        print('Failed to get prediction: ${response.statusCode}');
+        setState(() {
+          predictionResult = 'Error getting prediction';
+        });
+      }
+    } catch (error) {
+      print('Error: $error');
+      setState(() {
+        predictionResult = 'Error occurred';
+      });
+    }
   }
 
-  void checkSpam(String message) {
-    List<double> features = extractFeatures(message);
-    double result = predictTextMessage(features);
-    print("Prediction result: $result");
+  // Synchronous function for background processing
+  static Future<String> checkSpamSync(String message) async {
+    final url = 'http://3.27.110.191:5000/predict'; // Replace with your EC2 public IP
+    try {
+      // Send the POST request
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({'message': message}),
+      );
 
-    setState(() {
-      predictionResult = result > 0.5 ? 'Spam' : 'Not Spam';
-    });
+      // Check the response status
+      if (response.statusCode == 200) {
+        // Parse the response body
+        final jsonResponse = json.decode(response.body);
+        final prediction = jsonResponse['prediction'];
+        return prediction == 1 ? 'Spam' : 'Not Spam';
+      } else {
+        print('Failed to get prediction: ${response.statusCode}');
+        return 'Error getting prediction';
+      }
+    } catch (error) {
+      print('Error: $error');
+      return 'Error occurred';
+    }
+  }
+
+  static Future<void> backgroundMessageHandler(SmsMessage message) async {
+    if (message.body != null) {
+      String body = message.body!;
+      String result = await checkSpamSync(body);
+      print("Received SMS: $body is $result");
+    }
   }
 
   @override
@@ -139,7 +188,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
 
-                //Container + Message for Safe/Spam (Not Checking, but displays)
+                // Container + Message for Safe/Spam (Not Checking, but displays)
                 SizedBox(height: 20, width: 20),
                 if (predictionResult != null)
                   Stack(
@@ -178,7 +227,7 @@ class _HomePageState extends State<HomePage> {
                         child: Text(
                           predictionResult == 'Spam'
                               ? 'Most Likely Spam'
-                              : 'Most Likely Safe  ',
+                              : 'Most Likely Safe',
                           style: GoogleFonts.readexPro(
                             fontWeight: FontWeight.bold,
                             color: predictionResult == 'Spam'
@@ -219,10 +268,9 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ],
                   ),
-
               ],
+            ),
           ),
-        ),
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () {
@@ -237,8 +285,4 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
-}
-
-void backgroundMessageHandler(SmsMessage message) {
-  print("Received SMS in background: ${message.body}"); // testing, will only print in cpnsole
 }

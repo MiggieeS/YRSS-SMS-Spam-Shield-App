@@ -8,89 +8,89 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score
-import m2cgen as m2c
-import sys
+from flask import Flask, request, jsonify
+import joblib
 
-
+# Define column headers
 column_headers = ["Text Message", "Spam Classification"]
 
 # Read CSV from Google Sheets.
-# df = pd.read_csv("https://docs.google.com/spreadsheets/d/1sq05T7vcrl-CeSGqVxVVeGQjdYpbaV-uuXbFO92RxgU/export?format=csv", usecols=[0, 1])
 df = pd.read_csv("https://docs.google.com/spreadsheets/d/16JprumWE9baoRkWjQ20yrTCMgxFkJ5FJh_yLRRRun9g/export?format=csv", usecols=[0, 1])
 
-# Remove rows with missing data.
+# Remove rows with missing data and duplicates.
 df.dropna(subset=column_headers, inplace=True, how="any")
-
-# Remove duplicate rows (except the first occurence).
 df.drop_duplicates(subset=column_headers)
 
-# Make sample size have a 1:1 ratio (i.e., for every spam message there is a non spam message)
+# Make sample size have a 1:1 ratio (equal number of spam and non-spam messages)
 spam_df = df.query(f'(`{column_headers[1]}` == 1)')
 non_spam_df = df.query(f'(`{column_headers[1]}` == 0)')
 sample_size = min(spam_df.shape[0], non_spam_df.shape[0])
-# Use random sample_size*2 rows (for testing purpose).
-# Comment out when not testing.
-# sample_size = 2
 df = pd.concat([spam_df.sample(sample_size, random_state=0), non_spam_df.sample(sample_size, random_state=0)], ignore_index=True)
 
-# Preprocess "Text Message" column.
-# Download puntk_tab, stopwords, and wordnet from NLTK.
+# Preprocess the "Text Message" column.
 nltk.download("punkt")
-nltk.download("punkt_tab")
 nltk.download("stopwords")
 nltk.download("wordnet")
 lem = WordNetLemmatizer()
 
 def preprocess_text_message(text_message):
-    # Tokenize text_message.
     text_message = word_tokenize(text_message)
-    # Remove punctuation and stop words (from NLTK) in text_message and turn words to lower case.
     text_message = [word.lower() for word in text_message if word not in string.punctuation and word.lower() not in stopwords.words("english")]
-    # Lemmatize each word.
-    for part_of_speech in ["n", "v", "a", "r", "s"]:
-        text_message = [lem.lemmatize(word, part_of_speech) for word in text_message]
+    text_message = [lem.lemmatize(word, 'v') for word in text_message]
     return " ".join(text_message)
 
 df[column_headers[0]] = df[column_headers[0]].apply(preprocess_text_message)
 
-# Split data into X (independent variable) and Y (dependent variable).
-Y = df[column_headers[1]].values
-Y = Y.astype("int")  # Convert to values to integer.
+# Split data into X and Y
+Y = df[column_headers[1]].values.astype("int")
 X = df[column_headers[0]].values
 
 X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2, random_state=0)
 
-# Vectorize X_train and X_test.
-# Adding stop_words="english" and lowercase=True may be redundant.
+# Vectorize the text messages
 vectorizer = TfidfVectorizer()
 X_train_vector = vectorizer.fit_transform(X_train)
 X_test_vector = vectorizer.transform(X_test)
 
-# Train Logistic Regression Model.
+# Train Logistic Regression model
 model = LogisticRegression(verbose=1, solver="liblinear", penalty="l1")
 model.fit(X_train_vector, Y_train)
 
-# Test the model.
+# Test the model
 test_results = model.predict(X_test_vector)
 print(f"Accuracy = {accuracy_score(Y_test, test_results)}")
 
-# Test model through input.
-while True:
-    input_text_message = input("\nEnter text message.\nInput 'exit' to stop.\n> ")
-    if (input_text_message.lower() == "exit"):
-        break
-    result = model.predict(vectorizer.transform([preprocess_text_message(input_text_message)]))[0]
-    if result == 0:
-        print("-------------------\n| It is NOT spam. |\n-------------------")
-    elif result == 1:
-        print("---------------\n| It is SPAM! |\n---------------")
+# Save the model and vectorizer for later use in Flask
+joblib.dump(model, "spam_model.pkl")
+joblib.dump(vectorizer, "vectorizer.pkl")
 
-# Set recursion limit to a higher value (since the default value, 1000, makes m2c fail).
-sys.setrecursionlimit(10**4)
+# Load the model and vectorizer inside Flask app
+app = Flask(__name__)
+model = joblib.load("spam_model.pkl")
+vectorizer = joblib.load("vectorizer.pkl")
 
-# Convert Logistic Regression Model to Dart code.
-code = m2c.export_to_dart(model)
+# Endpoint for making predictions
+@app.route('/predict', methods=['POST'])
+def predict():
+    try:
+        # Get data from request
+        data = request.get_json()
+        message = data.get('message', '')
 
-# Save Dart code to file.
-with open("./spam_logistic_regression_model.dart", "w") as dart_file:
-    dart_file.write(code)
+        # Preprocess the message
+        processed_message = preprocess_text_message(message)
+
+        # Vectorize the message
+        vectorized_message = vectorizer.transform([processed_message])
+
+        # Make prediction
+        prediction = model.predict(vectorized_message)[0]
+        
+        # Return the result
+        return jsonify({'prediction': int(prediction)})  # 0 for Not Spam, 1 for Spam
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000, debug=True)
