@@ -30,7 +30,7 @@ non_spam_df = df.query(f'(`{column_headers[1]}` == 0)')
 sample_size = min(spam_df.shape[0], non_spam_df.shape[0])
 # Use random sample_size*2 rows (for testing purpose).
 # Comment out when not testing.
-sample_size = 2
+# sample_size = 2
 df = pd.concat([spam_df.sample(sample_size, random_state=0), non_spam_df.sample(sample_size, random_state=0)], ignore_index=True)
 
 # Preprocess "Text Message" column.
