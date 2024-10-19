@@ -45,4 +45,3 @@ app.*.map.json
 
 # Python files
 /python/venv/
-/python/spam_logistic_regression_model.dart
