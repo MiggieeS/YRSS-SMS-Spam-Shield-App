@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:telephony/telephony.dart';
 import 'package:http/http.dart' as http; // Import the http package
 import 'dart:convert'; // Import for JSON encoding/decoding
+import 'notification.dart';
 
 final Telephony telephony = Telephony.instance;
 
@@ -118,6 +119,7 @@ class _HomePageState extends State<HomePage> {
       String body = message.body!;
       String result = await checkSpamInBackground(body);
       print("Received SMS: $body is $result");
+      NotificationHandler.showNotification(result.toUpperCase(), body);
     }
   }
 

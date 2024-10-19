@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'home_page.dart';
 import 'package:telephony/telephony.dart';
 import 'package:flutter/services.dart';
+import 'notification.dart';
 
 final Telephony telephony = Telephony.instance;
 
@@ -10,6 +11,9 @@ void main() async {
 
   // Request SMS permissions before starting the app
   bool? permissionsGranted = await telephony.requestSmsPermissions;
+
+  // Initialize NotificationHandler.
+  NotificationHandler.init();
 
   // set to portrait mode only
   await SystemChrome.setPreferredOrientations([
