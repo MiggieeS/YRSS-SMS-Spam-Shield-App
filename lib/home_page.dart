@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:telephony/telephony.dart';
-import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http; // Import the http package
 import 'dart:convert'; // Import for JSON encoding/decoding
 
@@ -18,12 +17,13 @@ class _HomePageState extends State<HomePage> {
   final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
   final TextEditingController messageController = TextEditingController();
   String? predictionResult;
+  static const backendURL = 'http://3.27.110.191:5000/predict';
+  // static const backendURL = 'http://10.0.2.2:5000/predict';  // local backend
 
   @override
   void initState() {
     super.initState();
     startListeningForSms();
-    _lockOrientation(); // Portrait mode
   }
 
   void startListeningForSms() {
@@ -39,11 +39,6 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  void _lockOrientation() async {
-    await SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-    ]);
-  }
 
   void showSnackbar(String message) {
     scaffoldMessengerKey.currentState?.showSnackBar(
@@ -61,12 +56,10 @@ class _HomePageState extends State<HomePage> {
   }
 
   void checkSpam(String message) async {
-    final url = 'http://3.27.110.191:5000/predict';  // Replace with your EC2 public IP
-
     try {
       // Send the POST request
       final response = await http.post(
-        Uri.parse(url),
+        Uri.parse(backendURL),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({'message': message}),
       );
@@ -95,12 +88,11 @@ class _HomePageState extends State<HomePage> {
   }
 
   // Synchronous function for background processing
-  static Future<String> checkSpamSync(String message) async {
-    final url = 'http://3.27.110.191:5000/predict'; // Replace with your EC2 public IP
+  static Future<String> checkSpamInBackground(String message) async {
     try {
       // Send the POST request
       final response = await http.post(
-        Uri.parse(url),
+        Uri.parse(backendURL),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({'message': message}),
       );
@@ -124,7 +116,7 @@ class _HomePageState extends State<HomePage> {
   static Future<void> backgroundMessageHandler(SmsMessage message) async {
     if (message.body != null) {
       String body = message.body!;
-      String result = await checkSpamSync(body);
+      String result = await checkSpamInBackground(body);
       print("Received SMS: $body is $result");
     }
   }
