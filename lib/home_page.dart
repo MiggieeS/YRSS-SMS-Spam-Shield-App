@@ -14,11 +14,12 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
+  final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
+      GlobalKey<ScaffoldMessengerState>();
   final TextEditingController messageController = TextEditingController();
   String? predictionResult;
   static const backendURL = 'http://3.27.110.191:5000/predict';
-  // static const backendURL = 'http://10.0.2.2:5000/predict';  // local backend
+  // static const backendURL = 'http://10.0.2.2:5000/predict'; // local backend
 
   @override
   void initState() {
@@ -38,7 +39,6 @@ class _HomePageState extends State<HomePage> {
       listenInBackground: true,
     );
   }
-
 
   void showSnackbar(String message) {
     scaffoldMessengerKey.currentState?.showSnackBar(
@@ -71,18 +71,18 @@ class _HomePageState extends State<HomePage> {
         final prediction = jsonResponse['prediction'];
 
         setState(() {
-          predictionResult = prediction == 1 ? 'Spam' : 'Not Spam';
+          predictionResult = prediction == 1 ? 'spam' : 'not spam';
         });
       } else {
-        print('Failed to get prediction: ${response.statusCode}');
+        print('Error: ${response.statusCode}');
         setState(() {
-          predictionResult = 'Error getting prediction';
+          predictionResult = 'Error: ${response.statusCode}';
         });
       }
     } catch (error) {
       print('Error: $error');
       setState(() {
-        predictionResult = 'Error occurred';
+        predictionResult = 'Error: $error';
       });
     }
   }
@@ -102,14 +102,14 @@ class _HomePageState extends State<HomePage> {
         // Parse the response body
         final jsonResponse = json.decode(response.body);
         final prediction = jsonResponse['prediction'];
-        return prediction == 1 ? 'Spam' : 'Not Spam';
+        return prediction == 1 ? 'spam' : 'not spam';
       } else {
-        print('Failed to get prediction: ${response.statusCode}');
-        return 'Error getting prediction';
+        print('Error: ${response.statusCode}');
+        return 'Error: ${response.statusCode}';
       }
     } catch (error) {
       print('Error: $error');
-      return 'Error occurred';
+      return 'Error: $error';
     }
   }
 
@@ -166,14 +166,18 @@ class _HomePageState extends State<HomePage> {
                     decoration: InputDecoration(
                       labelText: 'Message',
                       hintText: 'Message',
-                      hintStyle: GoogleFonts.readexPro(color: const Color(0xFF878787)),
-                      labelStyle: GoogleFonts.readexPro(color: const Color(0xFF798087)),
+                      hintStyle:
+                          GoogleFonts.readexPro(color: const Color(0xFF878787)),
+                      labelStyle:
+                          GoogleFonts.readexPro(color: const Color(0xFF798087)),
                       enabledBorder: OutlineInputBorder(
-                        borderSide: const BorderSide(color: Color(0xFF878787), width: 2),
+                        borderSide: const BorderSide(
+                            color: Color(0xFF878787), width: 2),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Theme.of(context).primaryColor, width: 2),
+                        borderSide: BorderSide(
+                            color: Theme.of(context).primaryColor, width: 2),
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
@@ -190,13 +194,17 @@ class _HomePageState extends State<HomePage> {
                         width: 450,
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: predictionResult == 'Spam'
-                              ? const Color(0xFFf1f1f1)
-                              : const Color(0xFFf4f4e8),
+                          color: switch (predictionResult) {
+                            'spam' => const Color(0xFFf1f1f1),
+                            'not spam' => const Color(0xFFf4f4e8),
+                            _ => const Color(0xFFf4f4e8)
+                          },
                           border: Border.all(
-                            color: predictionResult == 'Spam'
-                                ? const Color(0xFFf1f1f1)
-                                : const Color(0xFFf4f4e8),
+                            color: switch (predictionResult) {
+                              'spam' => const Color(0xFFf1f1f1),
+                              'not spam' => const Color(0xFFf4f4e8),
+                              _ => const Color(0xFFf4f4e8)
+                            },
                             width: 2,
                           ),
                           borderRadius: BorderRadius.circular(8),
@@ -207,9 +215,17 @@ class _HomePageState extends State<HomePage> {
                         left: 10,
                         top: 10,
                         child: Icon(
-                          predictionResult == 'Spam' ? Icons.warning_amber_rounded : Icons.check,
+                          switch (predictionResult) {
+                            'spam' => Icons.warning_amber_rounded,
+                            'not spam' => Icons.check,
+                            _ => Icons.warning_amber_rounded
+                          },
                           size: 90, // Large icon size
-                          color: predictionResult == 'Spam' ? const Color(0xFF727272) : const Color(0xFF355E3B),
+                          color: switch (predictionResult) {
+                            'spam' => Colors.red,
+                            'not spam' => const Color(0xFF355E3B),
+                            _ => const Color(0xFF727272)
+                          },
                         ),
                       ),
                       // Text Positioning
@@ -217,14 +233,18 @@ class _HomePageState extends State<HomePage> {
                         right: 140,
                         top: 20,
                         child: Text(
-                          predictionResult == 'Spam'
-                              ? 'Most Likely Spam'
-                              : 'Most Likely Safe',
+                          switch (predictionResult) {
+                            'spam' => 'Most Likely Spam!',
+                            'not spam' => 'Most Likely Safe',
+                            _ => "Error!"
+                          },
                           style: GoogleFonts.readexPro(
                             fontWeight: FontWeight.bold,
-                            color: predictionResult == 'Spam'
-                                ? const Color(0xFF727272)
-                                : const Color(0xFF355E3B),
+                            color: switch (predictionResult) {
+                              'spam' => Colors.red,
+                              'not spam' => const Color(0xFF355E3B),
+                              _ => const Color(0xFF727272)
+                            },
                             fontSize: 20,
                           ),
                         ),
@@ -235,7 +255,13 @@ class _HomePageState extends State<HomePage> {
                         child: SizedBox(
                           width: 260,
                           child: Text(
-                            'The message is most likely a ${predictionResult == 'Spam' ? 'spam' : 'safe'} text, but still proceed with caution and awareness.',
+                            switch (predictionResult) {
+                              'spam' =>
+                                'The message is most likely a spam text, proceed with caution and awareness.',
+                              'not spam' =>
+                                'The message is most likely safe, but still proceed with caution and awareness.',
+                              _ => predictionResult ?? ""
+                            },
                             style: GoogleFonts.readexPro(
                               color: const Color(0xFF44433c),
                               fontSize: 12, // Smaller font size
@@ -250,9 +276,11 @@ class _HomePageState extends State<HomePage> {
                         child: Container(
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(8),
-                            color: predictionResult == 'Spam'
-                                ? const Color(0xFF727272)
-                                : const Color(0xFF355E3B),
+                            color: switch (predictionResult) {
+                              'spam' => Colors.red,
+                              'not spam' => const Color(0xFF355E3B),
+                              _ => const Color(0xFF727272)
+                            },
                           ),
                           height: 4,
                           width: double.infinity,
