@@ -16,7 +16,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
-  GlobalKey<ScaffoldMessengerState>();
+      GlobalKey<ScaffoldMessengerState>();
   final TextEditingController messageController = TextEditingController();
   String? predictionResult;
   static const backendURL = 'http://3.27.110.191:5000/predict';
@@ -124,7 +124,6 @@ class _HomePageState extends State<HomePage> {
     return ScaffoldMessenger(
       key: scaffoldMessengerKey,
       child: Scaffold(
-
         backgroundColor: const Color(0xFFfffcf5),
         body: SafeArea(
           child: Padding(
@@ -152,8 +151,10 @@ class _HomePageState extends State<HomePage> {
                     decoration: InputDecoration(
                       labelText: 'Message',
                       hintText: 'Message',
-                      hintStyle: GoogleFonts.readexPro(color: const Color(0xFF878787)),
-                      labelStyle: GoogleFonts.readexPro(color: const Color(0xFF798087)),
+                      hintStyle:
+                          GoogleFonts.readexPro(color: const Color(0xFF878787)),
+                      labelStyle:
+                          GoogleFonts.readexPro(color: const Color(0xFF798087)),
                       enabledBorder: OutlineInputBorder(
                         borderSide: const BorderSide(
                           color: Color(0xFF878787),
@@ -177,13 +178,17 @@ class _HomePageState extends State<HomePage> {
                     padding: const EdgeInsets.all(10),
                     width: screenWidth * 0.9,
                     decoration: BoxDecoration(
-                      color: predictionResult == 'spam'
-                          ? const Color(0xFFffdee1)
-                          : const Color(0xFFf4f4e8),
+                      color: switch (predictionResult) {
+                        "spam" => const Color(0xFFffdee1),
+                        "not spam" => const Color(0xFFf4f4e8),
+                        _ => Colors.grey.shade100
+                      },
                       border: Border.all(
-                        color: predictionResult == 'spam'
-                            ? const Color(0xFFd1515e)
-                            : const Color(0xFF355E3B),
+                        color: switch (predictionResult) {
+                          "spam" => const Color(0xFFd1515e),
+                          "not spam" => const Color(0xFF355E3B),
+                          _ => Colors.grey
+                        },
                         width: 2,
                       ),
                       borderRadius: BorderRadius.circular(8),
@@ -192,11 +197,17 @@ class _HomePageState extends State<HomePage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Icon(
-                          predictionResult == 'spam'
-                              ? Icons.warning_amber_rounded
-                              : Icons.check_circle_outline,
+                          switch (predictionResult) {
+                            "spam" => Icons.warning_amber_rounded,
+                            "not spam" => Icons.check_circle_outline,
+                            _ => Icons.warning_amber_rounded
+                          },
                           size: screenWidth * 0.12,
-                          color: predictionResult == 'spam' ? const Color(0xFFd1515e): const Color(0xFF355E3B),
+                          color: switch (predictionResult) {
+                            "spam" => const Color(0xFFd1515e),
+                            "not spam" => const Color(0xFF355E3B),
+                            _ => Colors.grey
+                          },
                         ),
                         const SizedBox(width: 10),
                         Expanded(
@@ -204,22 +215,30 @@ class _HomePageState extends State<HomePage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                predictionResult == 'spam'
-                                    ? 'Spam Detected!'
-                                    : 'Message is Safe',
+                                switch (predictionResult) {
+                                  "spam" => "Spam Detected!",
+                                  "not spam" => "Message is Safe",
+                                  _ => "Error!"
+                                },
                                 style: GoogleFonts.readexPro(
                                   fontWeight: FontWeight.bold,
-                                  color: predictionResult == 'spam'
-                                      ? const Color(0xFFd1515e)
-                                      : const Color(0xFF355E3B),
+                                  color: switch (predictionResult) {
+                                    "spam" => const Color(0xFFd1515e),
+                                    "not spam" => const Color(0xFF355E3B),
+                                    _ => Colors.grey
+                                  },
                                   fontSize: screenWidth * 0.05,
                                 ),
                               ),
                               const SizedBox(height: 5),
                               Text(
-                                predictionResult == 'spam'
-                                    ? 'The message appears to be spam. Be cautious before interacting.'
-                                    : 'This message is safe but always remain vigilant.',
+                                switch (predictionResult) {
+                                  "spam" =>
+                                    "The message appears to be spam. Be cautious before interacting.",
+                                  "not spam" =>
+                                    "This message is safe but always remain vigilant.",
+                                  _ => predictionResult ?? ""
+                                },
                                 style: GoogleFonts.readexPro(
                                   color: const Color(0xFF44433c),
                                   fontSize: screenWidth * 0.035,
