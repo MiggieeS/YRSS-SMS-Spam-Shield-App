@@ -23,11 +23,12 @@ df = pd.read_csv("https://docs.google.com/spreadsheets/d/16JprumWE9baoRkWjQ20yrT
 df.dropna(subset=column_headers, inplace=True, how="any")
 df.drop_duplicates(subset=column_headers)
 
+# Uncomment to make sample size have a 1:1 ratio.
 # Make sample size have a 1:1 ratio (equal number of spam and non-spam messages).
-spam_df = df.query(f'(`{column_headers[1]}` == 1)')
-non_spam_df = df.query(f'(`{column_headers[1]}` == 0)')
-sample_size = min(spam_df.shape[0], non_spam_df.shape[0])
-df = pd.concat([spam_df.sample(sample_size, random_state=0), non_spam_df.sample(sample_size, random_state=0)], ignore_index=True)
+# spam_df = df.query(f'(`{column_headers[1]}` == 1)')
+# non_spam_df = df.query(f'(`{column_headers[1]}` == 0)')
+# sample_size = min(spam_df.shape[0], non_spam_df.shape[0])
+# df = pd.concat([spam_df.sample(sample_size, random_state=0), non_spam_df.sample(sample_size, random_state=0)], ignore_index=True)
 
 # Preprocess the "Text Message" column.
 nltk.download("punkt")
