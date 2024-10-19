@@ -1,5 +1,6 @@
 # Python Standard Library.
 import string
+import csv
 
 # 3rd Party Packages.
 import pandas as pd
@@ -62,6 +63,15 @@ model.fit(X_train_vector, Y_train)
 # Test the model.
 test_results = model.predict(X_test_vector)
 print(f"Accuracy = {accuracy_score(Y_test, test_results)}")
+
+# Write features and their weights to a csv file.
+features = vectorizer.get_feature_names_out()
+weights = model.coef_[0]
+with open("features_and_weights.csv", "w", newline="") as csv_file:
+    csv_writer = csv.writer(csv_file)
+    for i in range(len(features)):
+        if (weights[i] != 0):
+            csv_writer.writerow([features[i],weights[i]])
 
 
 # Create Flask app.
