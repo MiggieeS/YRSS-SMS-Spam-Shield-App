@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:telephony/telephony.dart';
+import 'package:another_telephony/telephony.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'notification.dart';
@@ -60,6 +60,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  @pragma('vm:entry-point')
   void startListeningForSms() {
     telephony.listenIncomingSms(
       onNewMessage: (SmsMessage message) {
@@ -148,6 +149,7 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  @pragma('vm:entry-point')
   static Future<void> backgroundMessageHandler(SmsMessage message) async {
     if (message.body != null) {
       String body = message.body!;

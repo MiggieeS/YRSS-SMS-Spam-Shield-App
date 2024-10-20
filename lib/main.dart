@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'home_page.dart';
-import 'package:telephony/telephony.dart';
+import 'package:another_telephony/telephony.dart';
 import 'package:flutter/services.dart';
 import 'notification.dart';
 
