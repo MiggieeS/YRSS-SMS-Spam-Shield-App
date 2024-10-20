@@ -1,4 +1,4 @@
-# Python Standard Library.
+`# Python Standard Library.
 import string
 import csv
 
@@ -51,13 +51,13 @@ X = df[column_headers[0]].values
 
 X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2, random_state=0)
 
-# Vectorize the text messages.
-vectorizer = TfidfVectorizer()
+# Vectorize the text messages using TF-IDF with sublinear term frequency.
+vectorizer = TfidfVectorizer(sublinear_tf=True)  # Using sublinear TF to reduce the impact of high-frequency terms
 X_train_vector = vectorizer.fit_transform(X_train)
 X_test_vector = vectorizer.transform(X_test)
 
-# Train Logistic Regression model.
-model = LogisticRegression(verbose=1, solver="liblinear", penalty="l1")
+# Train Logistic Regression model with L2 regularization.
+model = LogisticRegression(verbose=1, solver="liblinear", penalty="l2")  # Changed to L2 regularization
 model.fit(X_train_vector, Y_train)
 
 # Test the model.
@@ -71,8 +71,8 @@ with open("features_and_weights.csv", "w", newline="") as csv_file:
     csv_writer = csv.writer(csv_file)
     for i in range(len(features)):
         if (weights[i] != 0):
-            csv_writer.writerow([features[i],weights[i]])
-
+            csv_writer.writerow([features[i], weights[i]])
+            print(f"{features[i]},{weights[i]}")
 
 # Create Flask app.
 app = Flask(__name__)
@@ -93,7 +93,7 @@ def predict():
 
         # Make prediction.
         prediction = model.predict(vectorized_message)[0]
-        
+
         # Return the result.
         return jsonify({'prediction': int(prediction)})  # 0 for Not Spam, 1 for Spam
 
@@ -103,3 +103,4 @@ def predict():
 # Run Flask app.
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
+`

@@ -16,15 +16,48 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
-      GlobalKey<ScaffoldMessengerState>();
+  GlobalKey<ScaffoldMessengerState>();
   final TextEditingController messageController = TextEditingController();
   String? predictionResult;
+  bool isLoading = false; // New loading state variable
   static const backendURL = 'http://3.27.110.191:5000/predict';
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      showWelcomeDialog();
+    });
     startListeningForSms();
+  }
+
+  void showWelcomeDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: const Color(0xFFfffcf5),
+          title: Text('Welcome to Spam Detector', style: GoogleFonts.readexPro()),
+          content: Text(
+            'This app helps you detect whether a message is spam or not.\n\n'
+            'You may manually copy and paste text to the text field and click the search button to check the message.\n\n'
+            'You may also allow access to background SMS reading and notifications to notify you whether you received a spam message or not.',
+            style: GoogleFonts.readexPro(),
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Dismiss the dialog
+              },
+              child: Text(
+                'Okay, got it!',
+                style: GoogleFonts.readexPro(color: Theme.of(context).primaryColor),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void startListeningForSms() {
@@ -56,6 +89,11 @@ class _HomePageState extends State<HomePage> {
   }
 
   void checkSpam(String message) async {
+    setState(() {
+      isLoading = true; // Show loading indicator
+      predictionResult = null; // Reset the result
+    });
+
     try {
       final response = await http.post(
         Uri.parse(backendURL),
@@ -71,15 +109,17 @@ class _HomePageState extends State<HomePage> {
           predictionResult = prediction == 1 ? 'spam' : 'not spam';
         });
       } else {
-        print('Error: ${response.statusCode}');
         setState(() {
           predictionResult = 'Error: ${response.statusCode}';
         });
       }
     } catch (error) {
-      print('Error: $error');
       setState(() {
         predictionResult = 'Error: $error';
+      });
+    } finally {
+      setState(() {
+        isLoading = false; // Hide loading indicator
       });
     }
   }
@@ -150,11 +190,11 @@ class _HomePageState extends State<HomePage> {
                     style: GoogleFonts.readexPro(color: Colors.black),
                     decoration: InputDecoration(
                       labelText: 'Message',
-                      hintText: 'Message',
+                      hintText: 'Type Message Here...',
                       hintStyle:
-                          GoogleFonts.readexPro(color: const Color(0xFF878787)),
+                      GoogleFonts.readexPro(color: const Color(0xFF878787)),
                       labelStyle:
-                          GoogleFonts.readexPro(color: const Color(0xFF798087)),
+                      GoogleFonts.readexPro(color: const Color(0xFF798087)),
                       enabledBorder: OutlineInputBorder(
                         borderSide: const BorderSide(
                           color: Color(0xFF878787),
@@ -170,9 +210,12 @@ class _HomePageState extends State<HomePage> {
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                  ),
+                  ),//0956 387 2399
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 10),
+                if (isLoading)
+                  const CircularProgressIndicator(), // Show loading indicator
+                const SizedBox(height: 0),
                 if (predictionResult != null)
                   Container(
                     padding: const EdgeInsets.all(10),
@@ -234,9 +277,9 @@ class _HomePageState extends State<HomePage> {
                               Text(
                                 switch (predictionResult) {
                                   "spam" =>
-                                    "The message appears to be spam. Be cautious before interacting.",
+                                  "The message appears to be spam. Be cautious before interacting.",
                                   "not spam" =>
-                                    "This message is safe but always remain vigilant.",
+                                  "This message is safe but always remain vigilant.",
                                   _ => predictionResult ?? ""
                                 },
                                 style: GoogleFonts.readexPro(
@@ -254,16 +297,17 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
         ),
-        floatingActionButton: FloatingActionButton.extended(
+        floatingActionButton: FloatingActionButton(
           onPressed: () {
             String message = messageController.text;
             checkSpam(message);
           },
-          backgroundColor: const Color(0xFFd3ee7e),
-          label: const Text('Check for Spam'),
-          icon: const Icon(Icons.search_rounded),
+          backgroundColor: const Color(0xFFf4f4e8),
+          child: const Icon(Icons.search_rounded),
         ),
       ),
     );
   }
 }
+
+
