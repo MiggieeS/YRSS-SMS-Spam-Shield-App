@@ -5,7 +5,7 @@ import csv
 # 3rd Party Packages.
 import pandas as pd
 import nltk
-from nltk.tokenize import word_tokenize
+from nltk.tokenize import TweetTokenizer
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -35,12 +35,16 @@ df.drop_duplicates(subset=column_headers)
 nltk.download("punkt")
 nltk.download("stopwords")
 nltk.download("wordnet")
+nltk.download('averaged_perceptron_tagger_eng')
 lem = WordNetLemmatizer()
+twitter_tokenizer = TweetTokenizer(strip_handles=True, reduce_len=True)
 
 def preprocess_text_message(text_message):
-    text_message = word_tokenize(text_message)
+    text_message = twitter_tokenizer.tokenize(text_message)
     text_message = [word.lower() for word in text_message if word not in string.punctuation and word.lower() not in stopwords.words("english")]
-    text_message = [lem.lemmatize(word, 'v') for word in text_message]
+    for part_of_speech in ["n", "v", "a", "r", "s"]:
+        text_message = [lem.lemmatize(word, part_of_speech) for word in text_message]
+    text_message = [f"taggedspeech{tag[1]}" if tag[1] in ["$", "CD", "FW", "LS", "NNP", "NNPS"] else tag[0] for tag in nltk.pos_tag(text_message)]
     return " ".join(text_message)
 
 df[column_headers[0]] = df[column_headers[0]].apply(preprocess_text_message)
