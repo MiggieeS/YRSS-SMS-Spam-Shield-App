@@ -95,10 +95,10 @@ def predict():
         vectorized_message = vectorizer.transform([processed_message])
 
         # Make prediction.
-        prediction = model.predict(vectorized_message)[0]
+        spam_prediction = model.predict_proba(vectorized_message)[0][1]
 
         # Return the result.
-        return jsonify({'prediction': int(prediction)})  # 0 for Not Spam, 1 for Spam
+        return jsonify({'prediction': round(float(spam_prediction)*100,2)})  # 0 for Not Spam, 1 for Spam
 
     except Exception as e:
         return jsonify({'error': str(e)}), 400

@@ -33,6 +33,13 @@ class NotificationHandler {
   }
 
   static Future<void> showNotification(String title, String body) async {
+    String predictionResult;
+    try {
+      predictionResult = num.parse(title) >= 50.00 ? "spam" : "not spam";
+    } catch (error) {
+      predictionResult = title;
+    }
+
     AndroidNotificationDetails androidNotificationDetails =
         AndroidNotificationDetails(
       'channel id',
@@ -42,7 +49,7 @@ class NotificationHandler {
       priority: Priority.high,
       channelShowBadge: false,
       colorized: true,
-      color: switch (title) {
+      color: switch (predictionResult) {
         "spam" => const Color(0xFFd1515e),
         "not spam" => const Color(0xFF355E3B),
         _ => Colors.grey
@@ -52,12 +59,12 @@ class NotificationHandler {
         NotificationDetails(android: androidNotificationDetails);
     await flutterLocalNotificationsPlugin.show(
         id++,
-        switch (title) {
-          "spam" => "Message is most likely spam",
-          "not spam" => "Message is most likely safe",
+        switch (predictionResult) {
+          "spam" => "${title}% likely to be SPAM!",
+          "not spam" => "${100-num.parse(title)}% likely to be safe.",
           _ => "Error!"
         },
-        switch (title) {
+        switch (predictionResult) {
           "spam" => body,
           "not spam" => body,
           _ => title,

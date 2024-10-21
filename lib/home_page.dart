@@ -19,6 +19,7 @@ class _HomePageState extends State<HomePage> {
   GlobalKey<ScaffoldMessengerState>();
   final TextEditingController messageController = TextEditingController();
   String? predictionResult;
+  num? predictionPercent;
   bool isLoading = false; // New loading state variable
   static const backendURL = 'http://3.27.110.191:5000/predict';
 
@@ -107,7 +108,8 @@ class _HomePageState extends State<HomePage> {
         final prediction = jsonResponse['prediction'];
 
         setState(() {
-          predictionResult = prediction == 1 ? 'spam' : 'not spam';
+          predictionResult = prediction >= 50.00 ? "spam" : "not spam";
+          predictionPercent = prediction;
         });
       } else {
         setState(() {
@@ -135,10 +137,8 @@ class _HomePageState extends State<HomePage> {
 
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
-        final prediction = jsonResponse['prediction'];
-        return prediction == 1
-            ? 'spam'
-            : 'not spam';
+        final prediction = jsonResponse['prediction'].toString();
+        return prediction;
       } else {
         print('Error: ${response.statusCode}');
         return 'Error: ${response.statusCode}';
@@ -212,7 +212,7 @@ class _HomePageState extends State<HomePage> {
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                  ),//0956 387 2399
+                  ),
                 ),
                 const SizedBox(height: 10),
                 if (isLoading)
@@ -279,9 +279,9 @@ class _HomePageState extends State<HomePage> {
                               Text(
                                 switch (predictionResult) {
                                   "spam" =>
-                                  "The message appears to be spam. Be cautious before interacting.",
+                                  "We are ${predictionPercent}% sure that this message is spam. Be cautious before interacting.",
                                   "not spam" =>
-                                  "This message is safe but always remain vigilant.",
+                                  "We are ${100-(predictionPercent ?? 0)}% sure that this message is safe but always remain vigilant.",
                                   _ => predictionResult ?? ""
                                 },
                                 style: GoogleFonts.readexPro(
