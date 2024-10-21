@@ -72,7 +72,6 @@ with open("features_and_weights.csv", "w", newline="") as csv_file:
     for i in range(len(features)):
         if (weights[i] != 0):
             csv_writer.writerow([features[i], weights[i]])
-            print(f"{features[i]},{weights[i]}")
 
 # Create Flask app.
 app = Flask(__name__)
