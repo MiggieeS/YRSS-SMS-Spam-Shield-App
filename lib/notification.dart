@@ -1,7 +1,9 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'dart:math';
 
 class NotificationHandler {
+  static int id = 0;
+
   static final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
 
@@ -31,16 +33,35 @@ class NotificationHandler {
   }
 
   static Future<void> showNotification(String title, String body) async {
-    const AndroidNotificationDetails androidNotificationDetails =
-        AndroidNotificationDetails('channel id', 'channel name',
-            channelDescription: 'channel description',
-            importance: Importance.max,
-            priority: Priority.high,
-            channelShowBadge: false
-            );
-    const NotificationDetails notificationDetails =
+    AndroidNotificationDetails androidNotificationDetails =
+        AndroidNotificationDetails(
+      'channel id',
+      'channel name',
+      channelDescription: 'channel description',
+      importance: Importance.max,
+      priority: Priority.high,
+      channelShowBadge: false,
+      colorized: true,
+      color: switch (title) {
+        "spam" => const Color(0xFFd1515e),
+        "not spam" => const Color(0xFF355E3B),
+        _ => Colors.grey
+      },
+    );
+    NotificationDetails notificationDetails =
         NotificationDetails(android: androidNotificationDetails);
     await flutterLocalNotificationsPlugin.show(
-        Random().nextInt(999999999), title, body, notificationDetails);
+        id++,
+        switch (title) {
+          "spam" => "Message is most likely spam",
+          "not spam" => "Message is most likely safe",
+          _ => "Error!"
+        },
+        switch (title) {
+          "spam" => body,
+          "not spam" => body,
+          _ => title,
+        },
+        notificationDetails);
   }
 }

@@ -137,8 +137,8 @@ class _HomePageState extends State<HomePage> {
         final jsonResponse = json.decode(response.body);
         final prediction = jsonResponse['prediction'];
         return prediction == 1
-            ? 'Message is most likely spam'
-            : 'Message is most likely safe';
+            ? 'spam'
+            : 'not spam';
       } else {
         print('Error: ${response.statusCode}');
         return 'Error: ${response.statusCode}';
@@ -155,7 +155,7 @@ class _HomePageState extends State<HomePage> {
       String body = message.body!;
       String result = await checkSpamInBackground(body);
       print("Received SMS: $body is $result");
-      NotificationHandler.showNotification(result.toUpperCase(), body);
+      NotificationHandler.showNotification(result, body);
     }
   }
 
