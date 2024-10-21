@@ -61,7 +61,7 @@ X_train_vector = vectorizer.fit_transform(X_train)
 X_test_vector = vectorizer.transform(X_test)
 
 # Train Logistic Regression model with L2 regularization.
-model = LogisticRegression(verbose=1, solver="liblinear", penalty="l2")  # Changed to L2 regularization
+model = LogisticRegression(verbose=1, solver="liblinear", penalty="l2", random_state=0)  # Changed to L2 regularization
 model.fit(X_train_vector, Y_train)
 
 # Test the model.
