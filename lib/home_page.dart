@@ -21,7 +21,7 @@ class _HomePageState extends State<HomePage> {
   String? predictionResult;
   num? predictionPercent;
   bool isLoading = false; // New loading state variable
-  static const backendURL = 'http://3.27.110.191:5000/predict';
+  static const backendURL = 'http://10.0.2.2:5000/predict';  // Change 10.0.2.2 (local web server) to public ip when deploying
 
   @override
   void initState() {
