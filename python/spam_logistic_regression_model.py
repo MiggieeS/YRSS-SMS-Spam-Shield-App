@@ -98,10 +98,41 @@ def predict():
         spam_prediction = model.predict_proba(vectorized_message)[0][1]
 
         # Return the result.
-        return jsonify({'prediction': round(float(spam_prediction)*100,2)})  # 0 for Not Spam, 1 for Spam
+        return jsonify({'prediction': round(float(spam_prediction)*100,2)})
 
     except Exception as e:
         return jsonify({'error': str(e)}), 400
+
+@app.route('/')
+def get_text_message():
+    return '<form method="POST"><input type="text" name="text" /><input type="submit" value="check text message" /></form>'
+
+@app.route('/', methods=['POST'])
+def predict_text_message():
+    try:
+        # Get message from form.
+        message = request.form['text']
+
+        # Preprocess the message.
+        processed_message = preprocess_text_message(message)
+
+        # Vectorize the message.
+        vectorized_message = vectorizer.transform([processed_message])
+
+        # Make prediction.
+        spam_prediction = model.predict_proba(vectorized_message)[0][1]
+
+        # Convert prediction to percentage.
+        percent = round(float(spam_prediction)*100,2)
+
+        # Return the result.
+        if percent >= 50:
+            return f'<form method="POST"><input type="text" name="text" /><input type="submit" value="check text message" /></form><p>Text message is {percent}% likely to be spam!</p>'
+        else:
+            return f'<form method="POST"><input type="text" name="text" /><input type="submit" value="check text message" /></form><p>Text message is {100-percent}% likely to be safe.</p>'
+
+    except Exception as e:
+        return f'<form method="POST"><input type="text" name="text" /><input type="submit" value="check text message" /><p>Error: {str(e)}</p>'
 
 # Run Flask app.
 if __name__ == '__main__':

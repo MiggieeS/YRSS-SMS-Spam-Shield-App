@@ -9,3 +9,5 @@ Use ***Command Prompt*** not ***Windows PowerShell***.
 5. `python -m flask --app spam_logistic_regression_model run`
 
 # INSTALL APK AND CONNECT PHONE TO THE SAME NETWORK WHERE FLASK APPLICATION IS RUNNING
+
+# ALTERNATIVELY, OPEN http://127.0.0.1:5000/ 
