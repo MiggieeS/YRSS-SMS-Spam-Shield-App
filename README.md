@@ -1,16 +1,11 @@
-# smsapp_1
 
-A new Flutter project.
+# SETUP PYTHON VIRTUAL ENVIRONMENT AND RUN FLASK APPLICATION
 
-## Getting Started
+Use ***Command Prompt*** not ***Windows PowerShell***.
+1. `cd .\python`
+2. `python -m venv venv`
+3. `.\venv\Scripts\activate`
+4. `python -m pip install -r requirements.txt`
+5. `python -m flask --app spam_logistic_regression_model run`
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+# INSTALL APK AND CONNECT PHONE TO THE SAME NETWORK WHERE FLASK APPLICATION IS RUNNING
