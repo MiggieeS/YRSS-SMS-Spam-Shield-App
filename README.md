@@ -1,13 +1,32 @@
+# YRSS SMS Spam Shield App 
 
-# SETUP PYTHON VIRTUAL ENVIRONMENT AND RUN FLASK APPLICATION
+A hybrid Android–Flask app that detects and blocks SMS spam using a logistic regression model.
 
-Use ***Command Prompt*** not ***Windows PowerShell***.
-1. `cd .\python`
-2. `python -m venv venv`
-3. `.\venv\Scripts\activate`
-4. `python -m pip install -r requirements.txt`
-5. `python -m flask --app spam_logistic_regression_model run`
+## App Features
+- Classifies incoming SMS messages as spam or safe
+- Uses a trained logistic regression model (`spam_model.pkl`)
+- Sends SMS data from Android to Flask backend for analysis
+- Works over local network for fast, private processing
 
-# INSTALL APK AND CONNECT PHONE TO THE SAME NETWORK WHERE FLASK APPLICATION IS RUNNING
+## Backend Overview
+- Built with **Flask** to serve the ML model
+- Uses `vectorizer.pkl` for text preprocessing
+- Exposes a local API endpoint for mobile communication
 
-# ALTERNATIVELY, OPEN http://127.0.0.1:5000/ 
+## Setup: Python Virtual Environment & Flask Server
+
+> Use **Command Prompt**, not **Windows PowerShell**
+
+```bash
+cd .\python
+python -m venv venv
+.\venv\Scripts\activate
+python -m pip install -r requirements.txt
+python -m flask --app spam_logistic_regression_model run
+```
+
+## Install APK & Connect Phone
+- Install the APK on your Android device
+- Connect your phone to the same network where the Flask application is running
+
+## ALTERNATIVELY, Open http://127.0.0.1:5000/ 
